@@ -6,6 +6,7 @@ from typing import Literal, override
 
 from aiohttp import ClientError
 from google.genai.errors import APIError
+from google.genai.types import AutomaticFunctionCallingConfig
 from httpx2 import TransportError
 
 from homeassistant.components import conversation
@@ -20,7 +21,7 @@ from .const import (
     CONF_STRUCTURED_RESPONSE,
     DOMAIN,
     LOGGER,
-    TIMEOUT_MILLIS,
+    STRUCTURED_RESPONSE_TIMEOUT,
 )
 from .entity import GoogleGenerativeAILLMBaseEntity
 from .response import RESPONSE_SCHEMA, parse_response
@@ -141,6 +142,7 @@ class GoogleGenerativeAIConversationEntity(
     ) -> None:
         """Format a completed answer without granting the formatter tool access."""
         config = self.create_generate_content_config()
+        config.automatic_function_calling = AutomaticFunctionCallingConfig(disable=True)
         config.response_mime_type = "application/json"
         config.response_schema = RESPONSE_SCHEMA
         config.system_instruction = (
@@ -152,7 +154,7 @@ class GoogleGenerativeAIConversationEntity(
             "the answer's useful details in the card."
         )
         try:
-            async with asyncio.timeout(TIMEOUT_MILLIS / 1000):
+            async with asyncio.timeout(STRUCTURED_RESPONSE_TIMEOUT):
                 response = await self._genai_client.aio.models.generate_content(
                     model=self.subentry.data.get(CONF_CHAT_MODEL, self.default_model),
                     contents=json.dumps(
@@ -165,8 +167,11 @@ class GoogleGenerativeAIConversationEntity(
                     config=config,
                 )
             speech, card = parse_response(response.text)
-        except APIError, ClientError, TransportError, TimeoutError, ValueError:
-            LOGGER.debug("Structured response unavailable; using the original answer")
+        except (APIError, ClientError, TransportError, TimeoutError, ValueError) as err:
+            LOGGER.debug(
+                "Structured response unavailable (%s); using the original answer",
+                type(err).__name__,
+            )
             return
 
         result.response.async_set_speech(speech)

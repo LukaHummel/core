@@ -41,7 +41,35 @@ of the staged patch. It was stopped during the all-repository Pylint scan of
 19,175 files after approximately 14 minutes. The complete all-repository hook
 suite is not claimed to pass. Targeted checks are reported above.
 
-No real Gemini credentials, microphone/satellite or dashboard was used. Run the
-manual checks in `STRUCTURED_RESPONSES.md` on your test instance before using this
-experimental branch in your regular installation. The matching View Assist
-fork has its own `PATCH_VALIDATION.md` and 23 callback/routing tests.
+## Paired and live E2E testing
+
+After the initial component checks, 10 paired application E2E scenarios passed
+through authenticated HTTP, the real Gemini SDK against a loopback HTTP/SSE
+provider, HA state events and the actual View Assist navigation manager. These
+cover cards, ordinary streaming requests, follow-up history, repeat speech,
+timed revert, command priority and error fallbacks.
+
+Live Docker testing found valid structured generation took about 29 seconds,
+longer than the initial 10-second formatter deadline. The formatter now has its
+own 60-second deadline and explicitly disables SDK automatic function calling.
+All 24 response tests and 10 paired E2E cases passed again after this fix. Scoped
+lint, formatting, Pylint and mypy checks passed on the revised code.
+
+A live spoken recipe passed through Gemini STT, conversation, structured
+formatting, real View Assist sensor/navigation/browser rendering and Gemini TTS
+in 71.4 seconds. The actual Info screen and generated audio were captured. A
+spoken light command then changed a virtual light exactly once and opened the
+actual intent view in 12.2 seconds. The live todo attempt was blocked by the
+Gemini 2.5 Flash daily free-tier quota; it is not claimed to pass.
+
+Synthetic recorded audio was uploaded through the Assist WebSocket protocol. A
+test bridge forwarded the complete pipeline intent result into the configured
+intent sensor. This does not verify a physical microphone, satellite wiring or
+speaker playback. The recipe used Gemini 2.5 Flash STT, Gemini 3.1 Flash Lite
+conversation/formatting and Gemini 3.1 Flash TTS Preview. The light command used
+Gemini 2.5 Flash conversation after high-demand errors from the default model.
+
+Provider 503 errors, synthetic-name misrecognition, an empty primary response
+and quota failures are retained in the local HTML report alongside final results.
+The matching View Assist fork has 23 callback regression tests. No credentials
+or authentication tokens are included in the report or committed sources.

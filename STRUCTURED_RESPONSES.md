@@ -10,6 +10,8 @@ and thought-signature handling. Once that request finishes, a separate, tool-fre
 Gemini request formats its answer into concise plain speech and an optional native
 simple card. A simple acknowledgement can have `card: null`. The formatter sees
 only the completed answer and response language, and cannot execute commands.
+The formatter has a separate 60-second deadline. Live testing found valid
+structured generation can exceed the integration's 10-second setup deadline.
 This costs an additional API request and adds latency. All speech deltas wait for
 formatting; the pipeline receives only the final spoken answer. With the option
 disabled, the original streaming behavior is unchanged.

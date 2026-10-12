@@ -116,6 +116,7 @@ async def test_structured_conversation(
     assert mock_chat_create.call_args.kwargs["config"].response_mime_type is None
     config = mock_generate_content.call_args.kwargs["config"]
     assert config.tools is None
+    assert config.automatic_function_calling.disable is True
     assert config.response_mime_type == "application/json"
     assert listener.call_args.args[1]["content"] == expected_speech
     assert len([c for c in listener.call_args_list if c.args[1].get("content")]) == 1
