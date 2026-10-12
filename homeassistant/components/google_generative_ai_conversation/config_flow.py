@@ -41,6 +41,7 @@ from .const import (
     CONF_MAX_TOKENS,
     CONF_RECOMMENDED,
     CONF_SEXUAL_BLOCK_THRESHOLD,
+    CONF_STRUCTURED_RESPONSE,
     CONF_TEMPERATURE,
     CONF_THINKING_BUDGET,
     CONF_THINKING_LEVEL,
@@ -338,6 +339,12 @@ async def google_generative_ai_config_option_schema(
     if subentry_type == "conversation":
         schema.update(
             {
+                probatio.Optional(
+                    CONF_STRUCTURED_RESPONSE,
+                    description={
+                        "suggested_value": options.get(CONF_STRUCTURED_RESPONSE, False)
+                    },
+                ): bool,
                 probatio.Optional(
                     CONF_PROMPT,
                     description={
